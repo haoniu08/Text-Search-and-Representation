@@ -21,7 +21,6 @@ using the following method:
 The word checker is then tested using a list of words, and the closest word
 to each word is printed to the console.
 """
-
 import numpy as np
 
 class KDTreeNode:
@@ -53,18 +52,20 @@ class KDTree:
         )
 
     def nearest_neighbor(self, point):
-        def recursive_search(node, depth=0, best=None):
+        def recursive_search(node, depth=0, best=None, best_dist=float('inf')):
             if node is None:
-                return best
+                return best, best_dist
 
             k = len(point)
             axis = depth % k
 
             next_best = best
-            next_branch = None
+            next_best_dist = best_dist
 
-            if next_best is None or np.linalg.norm(np.array(point) - np.array(node.point)) < np.linalg.norm(np.array(point) - np.array(next_best)):
+            point_dist = np.linalg.norm(np.array(point) - np.array(node.point))
+            if point_dist < next_best_dist:
                 next_best = node.point
+                next_best_dist = point_dist
 
             if point[axis] < node.point[axis]:
                 next_branch = node.left
@@ -73,12 +74,12 @@ class KDTree:
                 next_branch = node.right
                 other_branch = node.left
 
-            next_best = recursive_search(next_branch, depth + 1, next_best)
+            next_best, next_best_dist = recursive_search(next_branch, depth + 1, next_best, next_best_dist)
 
-            if np.linalg.norm(np.array(point) - np.array(next_best)) > abs(point[axis] - node.point[axis]):
-                next_best = recursive_search(other_branch, depth + 1, next_best)
+            if abs(point[axis] - node.point[axis]) < next_best_dist:
+                next_best, next_best_dist = recursive_search(other_branch, depth + 1, next_best, next_best_dist)
 
-            return next_best
+            return next_best, next_best_dist
 
         return recursive_search(self.root)
 
@@ -102,8 +103,17 @@ class WordChecker:
 
     def find_nearest(self, word):
         vector = self.word_to_vector(word)
-        nearest_vector = self.kd_tree.nearest_neighbor(vector)
-        nearest_word_index = self.vectors.index(nearest_vector)
+        print(f"Input word vector: {vector}")
+        nearest_vector, distance = self.kd_tree.nearest_neighbor(vector)
+        print(f"Nearest vector found: {nearest_vector}")
+        
+        # Find the index of the nearest vector
+        nearest_word_index = -1
+        for i, vec in enumerate(self.vectors):
+            if np.array_equal(vec, nearest_vector):
+                nearest_word_index = i
+                break
+                
         return self.words[nearest_word_index]
 
 # Example usage
