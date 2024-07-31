@@ -1,7 +1,7 @@
 """
 This file contains a basic program which resembles a word checker. 
-The word checker implemments both kd-tree and ball-tree, while using 
-nearest neighbour search to find the closest word to the input word.
+The word checker implemments kd-tree while using nearest neighbour
+search to find the closest word to the input word.
 
 The vector representation is manually implemented, and the word is converted
 to a vector using the following method:
@@ -97,9 +97,8 @@ class WordChecker:
             num_list = num_list[:self.max_length]
         else:
             num_list += [0] * (self.max_length - len(num_list))
-        num_array = np.array(num_list)
-        norm_array = num_array / np.linalg.norm(num_array)
-        return norm_array
+        num_array = np.array(num_list, dtype=np.float32)
+        return num_array
 
     def find_nearest(self, word):
         vector = self.word_to_vector(word)
@@ -117,7 +116,7 @@ class WordChecker:
         return self.words[nearest_word_index]
 
 # Example usage
-words = ["apple", "banana", "grape", "orange", "peach", "pear", "strawberry", "watermelon"]
+words = ["apple", "banana", "grape", "orange", "peach", "pear"]
 checker = WordChecker(words)
 input_word = "strawberry"
 nearest_word = checker.find_nearest(input_word)
